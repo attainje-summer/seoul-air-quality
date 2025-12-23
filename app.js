@@ -11,16 +11,8 @@ const elements = {
     lastUpdate: document.getElementById('lastUpdate'),
 
     // Buttons
-    settingsBtn: document.getElementById('settingsBtn'),
     refreshBtn: document.getElementById('refreshBtn'),
     retryBtn: document.getElementById('retryBtn'),
-
-    // Modal
-    settingsModal: document.getElementById('settingsModal'),
-    modalClose: document.getElementById('modalClose'),
-    apiKeyInput: document.getElementById('apiKeyInput'),
-    saveBtn: document.getElementById('saveBtn'),
-    cancelBtn: document.getElementById('cancelBtn'),
 
     // PM10 Elements
     pm10TodayDate: document.getElementById('pm10TodayDate'),
@@ -43,78 +35,22 @@ const elements = {
 function init() {
     loadApiKey();
     setupEventListeners();
-
-    if (apiKey) {
-        loadForecastData();
-    } else {
-        showError('API 키가 설정되지 않았습니다.<br>설정 버튼을 눌러 API 키를 입력해주세요.');
-    }
+    loadForecastData();
 
     // Setup auto-refresh
     setupAutoRefresh();
 }
 
-// Load API Key from localStorage
+// Load API Key from config
 function loadApiKey() {
-    apiKey = localStorage.getItem(CONFIG.STORAGE_KEYS.API_KEY) || '';
-}
-
-// Save API Key to localStorage
-function saveApiKey(key) {
-    apiKey = key;
-    localStorage.setItem(CONFIG.STORAGE_KEYS.API_KEY, key);
+    apiKey = CONFIG.DEFAULT_API_KEY || '';
 }
 
 // Setup Event Listeners
 function setupEventListeners() {
-    // Settings Modal
-    elements.settingsBtn.addEventListener('click', openSettingsModal);
-    elements.modalClose.addEventListener('click', closeSettingsModal);
-    elements.cancelBtn.addEventListener('click', closeSettingsModal);
-    elements.saveBtn.addEventListener('click', saveSettings);
-
     // Refresh
     elements.refreshBtn.addEventListener('click', handleRefresh);
     elements.retryBtn.addEventListener('click', handleRefresh);
-
-    // Close modal on backdrop click
-    elements.settingsModal.addEventListener('click', (e) => {
-        if (e.target === elements.settingsModal) {
-            closeSettingsModal();
-        }
-    });
-
-    // Enter key in API key input
-    elements.apiKeyInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            saveSettings();
-        }
-    });
-}
-
-// Open Settings Modal
-function openSettingsModal() {
-    elements.apiKeyInput.value = apiKey;
-    elements.settingsModal.classList.add('active');
-}
-
-// Close Settings Modal
-function closeSettingsModal() {
-    elements.settingsModal.classList.remove('active');
-}
-
-// Save Settings
-function saveSettings() {
-    const newApiKey = elements.apiKeyInput.value.trim();
-
-    if (!newApiKey) {
-        alert('API 키를 입력해주세요.');
-        return;
-    }
-
-    saveApiKey(newApiKey);
-    closeSettingsModal();
-    loadForecastData();
 }
 
 // Handle Refresh

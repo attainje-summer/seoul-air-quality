@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -13,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -21,13 +23,7 @@
                 <span class="icon">🌫️</span>
                 서울 미세먼지 예보
             </h1>
-            <button class="settings-btn" id="settingsBtn" aria-label="설정">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 1v6m0 6v6m0-18a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"></path>
-                    <path d="M16.24 7.76l-2.12 2.12m-4.24 4.24l-2.12 2.12m8.48-8.48l2.12-2.12m-12.72 12.72l-2.12 2.12"></path>
-                </svg>
-            </button>
+
         </header>
 
         <!-- Last Update Info -->
@@ -61,7 +57,7 @@
                     <span class="particle-icon">💨</span>
                     미세먼지 (PM10)
                 </h2>
-                
+
                 <div class="forecast-cards">
                     <!-- Today -->
                     <div class="forecast-card" id="pm10Today">
@@ -99,7 +95,7 @@
                     <span class="particle-icon">🌪️</span>
                     초미세먼지 (PM2.5)
                 </h2>
-                
+
                 <div class="forecast-cards">
                     <!-- Today -->
                     <div class="forecast-card" id="pm25Today">
@@ -156,49 +152,10 @@
         </main>
     </div>
 
-    <!-- Settings Modal -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">설정</h2>
-                <button class="modal-close" id="modalClose" aria-label="닫기">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="apiKeyInput" class="form-label">
-                        API 키
-                        <span class="form-hint">공공데이터포털에서 발급받은 API 키를 입력하세요</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        id="apiKeyInput" 
-                        class="form-input" 
-                        placeholder="API 키를 입력하세요"
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="form-info">
-                    <p>📌 API 키 발급 방법:</p>
-                    <ol>
-                        <li><a href="https://www.data.go.kr" target="_blank" rel="noopener">공공데이터포털</a> 회원가입</li>
-                        <li>"에어코리아 대기오염정보" 검색</li>
-                        <li>활용신청 후 API 키 발급</li>
-                    </ol>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelBtn">취소</button>
-                <button class="btn btn-primary" id="saveBtn">저장</button>
-            </div>
-        </div>
-    </div>
+
 
     <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
