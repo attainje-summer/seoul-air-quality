@@ -54,6 +54,44 @@
             <!-- PM10 (미세먼지) -->
             <section class="forecast-section">
                 <h2 class="section-title">
+                    <span class="particle-icon">🌪️</span>
+                    미세먼지 (PM2.5)
+                </h2>
+
+                <div class="forecast-cards">
+                    <!-- Today -->
+                    <div class="forecast-card" id="pm25Today">
+                        <div class="card-header">
+                            <h3 class="card-title">오늘</h3>
+                            <span class="card-date" id="pm25TodayDate">-</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="grade-badge" id="pm25TodayGrade" data-grade="1">
+                                <span class="grade-text">좋음</span>
+                            </div>
+                            <p class="forecast-text" id="pm25TodayText">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Tomorrow -->
+                    <div class="forecast-card" id="pm25Tomorrow">
+                        <div class="card-header">
+                            <h3 class="card-title">내일</h3>
+                            <span class="card-date" id="pm25TomorrowDate">-</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="grade-badge" id="pm25TomorrowGrade" data-grade="1">
+                                <span class="grade-text">좋음</span>
+                            </div>
+                            <p class="forecast-text" id="pm25TomorrowText">-</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PM2.5 (초미세먼지) -->
+            <section class="forecast-section">
+                <h2 class="section-title">
                     <span class="particle-icon">💨</span>
                     미세먼지 (PM10)
                 </h2>
@@ -84,44 +122,6 @@
                                 <span class="grade-text">좋음</span>
                             </div>
                             <p class="forecast-text" id="pm10TomorrowText">-</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- PM2.5 (초미세먼지) -->
-            <section class="forecast-section">
-                <h2 class="section-title">
-                    <span class="particle-icon">🌪️</span>
-                    초미세먼지 (PM2.5)
-                </h2>
-
-                <div class="forecast-cards">
-                    <!-- Today -->
-                    <div class="forecast-card" id="pm25Today">
-                        <div class="card-header">
-                            <h3 class="card-title">오늘</h3>
-                            <span class="card-date" id="pm25TodayDate">-</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="grade-badge" id="pm25TodayGrade" data-grade="1">
-                                <span class="grade-text">좋음</span>
-                            </div>
-                            <p class="forecast-text" id="pm25TodayText">-</p>
-                        </div>
-                    </div>
-
-                    <!-- Tomorrow -->
-                    <div class="forecast-card" id="pm25Tomorrow">
-                        <div class="card-header">
-                            <h3 class="card-title">내일</h3>
-                            <span class="card-date" id="pm25TomorrowDate">-</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="grade-badge" id="pm25TomorrowGrade" data-grade="1">
-                                <span class="grade-text">좋음</span>
-                            </div>
-                            <p class="forecast-text" id="pm25TomorrowText">-</p>
                         </div>
                     </div>
                 </div>

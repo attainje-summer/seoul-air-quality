@@ -134,6 +134,13 @@ async function fetchForecastData(informCode) {
 
         const data = await response.json();
 
+        // 🔍 DEBUG: Log raw API response
+        console.log(`=== ${informCode} API Response ===`);
+        console.log(JSON.stringify(data, null, 2));
+
+        // 🔍 DEBUG: Save to downloadable text file
+        saveDebugData(informCode, data);
+
         // Check API response
         if (data.response.header.resultCode !== '00') {
             throw new Error(data.response.header.resultMsg || 'API 오류가 발생했습니다.');
@@ -146,96 +153,125 @@ async function fetchForecastData(informCode) {
     }
 }
 
+// 🔍 DEBUG: Save API response to downloadable file
+function saveDebugData(informCode, data) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `api_response_${informCode}_${timestamp}.txt`;
+
+    const debugText = `
+===========================================
+API Response for ${informCode}
+Time: ${new Date().toLocaleString('ko-KR')}
+===========================================
+
+${JSON.stringify(data, null, 2)}
+
+===========================================
+Items Detail:
+===========================================
+${JSON.stringify(data.response.body.items, null, 2)}
+`;
+
+    // Create download link
+    const blob = new Blob([debugText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log(`✅ Debug file saved: ${filename}`);
+}
+
 // Parse Forecast Data for Seoul
 function parseForecastData(items, informCode) {
     if (!items || items.length === 0) {
         return null;
     }
 
-    // Get the most recent forecast
-    const latestItem = items[0];
+    console.log(`📋 Parsing ${informCode} data...`);
+    console.log('Total items:', items.length);
 
-    // Extract Seoul data from informGrade
-    const seoulData = extractSeoulData(latestItem.informGrade);
+    const today = getTodayDate();
+    const tomorrow = getTomorrowDate();
 
-    if (!seoulData) {
+    console.log('Today:', today);
+    console.log('Tomorrow:', tomorrow);
+
+    let todayData = null;
+    let tomorrowData = null;
+
+    // Find data by date
+    for (const item of items) {
+        console.log(`Checking item - informData: ${item.informData}, informCode: ${item.informCode}`);
+
+        if (item.informCode !== informCode) {
+            continue;
+        }
+
+        if (item.informData === today) {
+            console.log('✅ Found TODAY data');
+            todayData = item;
+        } else if (item.informData === tomorrow) {
+            console.log('✅ Found TOMORROW data');
+            tomorrowData = item;
+        }
+    }
+
+    if (!todayData && !tomorrowData) {
+        console.warn('⚠️ No data found for today or tomorrow');
         return null;
     }
 
+    // Extract Seoul grade from informGrade
+    const todaySeoulGrade = todayData ? extractSeoulGrade(todayData.informGrade) : '정보없음';
+    const tomorrowSeoulGrade = tomorrowData ? extractSeoulGrade(tomorrowData.informGrade) : '정보없음';
+
+    console.log('Today Seoul grade:', todaySeoulGrade);
+    console.log('Tomorrow Seoul grade:', tomorrowSeoulGrade);
+
     return {
         informCode: informCode,
-        dataTime: latestItem.dataTime,
-        informOverall: latestItem.informOverall,
-        informCause: latestItem.informCause,
+        dataTime: todayData?.dataTime || tomorrowData?.dataTime,
+        todayInformCause: todayData?.informCause || '정보 없음',
+        tomorrowInformCause: tomorrowData?.informCause || '정보 없음',
         today: {
-            grade: seoulData.today,
-            gradeValue: CONFIG.GRADE_MAP[seoulData.today] || 1
+            grade: todaySeoulGrade,
+            gradeValue: CONFIG.GRADE_MAP[todaySeoulGrade] || 1
         },
         tomorrow: {
-            grade: seoulData.tomorrow,
-            gradeValue: CONFIG.GRADE_MAP[seoulData.tomorrow] || 1
+            grade: tomorrowSeoulGrade,
+            gradeValue: CONFIG.GRADE_MAP[tomorrowSeoulGrade] || 1
         }
     };
 }
 
-// Extract Seoul Data from informGrade string
-function extractSeoulData(informGrade) {
-    if (!informGrade) return null;
+// Extract Seoul Grade from informGrade string
+function extractSeoulGrade(informGrade) {
+    if (!informGrade) return '정보없음';
 
-    // informGrade format: "서울 : 좋음,제주 : 좋음,전남 : 좋음,..."
-    // or with tomorrow: "오늘 전국 : 좋음, 내일 전국 : 보통"
+    console.log('Extracting Seoul grade from:', informGrade);
 
-    const lines = informGrade.split(',').map(s => s.trim());
-    let todayGrade = null;
-    let tomorrowGrade = null;
+    // informGrade format: "서울 : 보통,제주 : 좋음,전남 : 좋음,..."
+    const regions = informGrade.split(',').map(s => s.trim());
 
-    for (const line of lines) {
-        // Check for Seoul specifically
-        if (line.includes('서울')) {
-            const parts = line.split(':');
+    for (const region of regions) {
+        if (region.includes('서울')) {
+            const parts = region.split(':');
             if (parts.length >= 2) {
                 const grade = parts[1].trim();
-                if (line.includes('내일')) {
-                    tomorrowGrade = grade;
-                } else {
-                    todayGrade = grade;
-                }
-            }
-        }
-
-        // Fallback to national forecast if Seoul not found
-        if (line.includes('전국')) {
-            const parts = line.split(':');
-            if (parts.length >= 2) {
-                const grade = parts[1].trim();
-                if (line.includes('내일')) {
-                    if (!tomorrowGrade) tomorrowGrade = grade;
-                } else if (line.includes('오늘')) {
-                    if (!todayGrade) todayGrade = grade;
-                }
+                console.log('Found Seoul grade:', grade);
+                return grade;
             }
         }
     }
 
-    // If still no data, try to parse differently
-    if (!todayGrade && !tomorrowGrade) {
-        // Simple format: just "서울 : 좋음"
-        for (const line of lines) {
-            if (line.includes('서울')) {
-                const match = line.match(/:\s*(.+)/);
-                if (match) {
-                    todayGrade = match[1].trim();
-                    tomorrowGrade = todayGrade; // Use same for tomorrow if not specified
-                    break;
-                }
-            }
-        }
-    }
-
-    return {
-        today: todayGrade || '정보없음',
-        tomorrow: tomorrowGrade || '정보없음'
-    };
+    console.warn('⚠️ Seoul grade not found, using default');
+    return '정보없음';
 }
 
 // Load All Forecast Data
@@ -247,16 +283,27 @@ async function loadForecastData() {
 
     showLoading();
 
+    console.log('🚀 Starting API fetch...');
+    console.log('API Key:', apiKey.substring(0, 10) + '...');
+
     try {
         // Fetch both PM10 and PM2.5 data
-        const [pm10Items, pm25Items] = await Promise.all([
-            fetchForecastData(CONFIG.INFORM_CODE.PM10),
-            fetchForecastData(CONFIG.INFORM_CODE.PM25)
-        ]);
+        console.log('📡 Fetching PM10 data...');
+        const pm10Items = await fetchForecastData(CONFIG.INFORM_CODE.PM10);
+        console.log('✅ PM10 data received');
+
+        console.log('📡 Fetching PM2.5 data...');
+        const pm25Items = await fetchForecastData(CONFIG.INFORM_CODE.PM25);
+        console.log('✅ PM2.5 data received');
 
         // Parse data
+        console.log('🔄 Parsing PM10 data...');
         const pm10Data = parseForecastData(pm10Items, CONFIG.INFORM_CODE.PM10);
+        console.log('PM10 parsed:', pm10Data);
+
+        console.log('🔄 Parsing PM2.5 data...');
         const pm25Data = parseForecastData(pm25Items, CONFIG.INFORM_CODE.PM25);
+        console.log('PM2.5 parsed:', pm25Data);
 
         if (!pm10Data && !pm25Data) {
             throw new Error('서울 지역의 예보 데이터를 찾을 수 없습니다.');
@@ -274,15 +321,22 @@ async function loadForecastData() {
         localStorage.setItem(CONFIG.STORAGE_KEYS.LAST_UPDATE, forecastData.lastUpdate);
 
         // Update UI
+        console.log('🎨 Updating UI...');
         updateUI();
         showContent();
+        console.log('✅ All done!');
 
     } catch (error) {
-        console.error('Load forecast error:', error);
+        console.error('❌ Load forecast error:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack
+        });
         showError(
             `데이터를 불러오는 중 오류가 발생했습니다.<br>` +
             `<small>${error.message}</small><br><br>` +
-            `API 키가 올바른지 확인해주세요.`
+            `API 키가 올바른지 확인해주세요.<br><br>` +
+            `<small>F12를 눌러 콘솔을 확인하세요.</small>`
         );
     }
 }
@@ -306,7 +360,7 @@ function updateUI() {
             elements.pm10TodayText,
             todayDate,
             forecastData.pm10.today,
-            forecastData.pm10.informOverall
+            forecastData.pm10.todayInformCause
         );
 
         updateForecastCard(
@@ -315,7 +369,7 @@ function updateUI() {
             elements.pm10TomorrowText,
             tomorrowDate,
             forecastData.pm10.tomorrow,
-            forecastData.pm10.informOverall
+            forecastData.pm10.tomorrowInformCause
         );
     }
 
@@ -327,7 +381,7 @@ function updateUI() {
             elements.pm25TodayText,
             todayDate,
             forecastData.pm25.today,
-            forecastData.pm25.informOverall
+            forecastData.pm25.todayInformCause
         );
 
         updateForecastCard(
@@ -336,17 +390,17 @@ function updateUI() {
             elements.pm25TomorrowText,
             tomorrowDate,
             forecastData.pm25.tomorrow,
-            forecastData.pm25.informOverall
+            forecastData.pm25.tomorrowInformCause
         );
     }
 }
 
 // Update Individual Forecast Card
-function updateForecastCard(dateEl, gradeEl, textEl, date, gradeData, overallText) {
+function updateForecastCard(dateEl, gradeEl, textEl, date, gradeData, causeText) {
     dateEl.textContent = formatDateForDisplay(date);
     gradeEl.setAttribute('data-grade', gradeData.gradeValue);
     gradeEl.querySelector('.grade-text').textContent = gradeData.grade;
-    textEl.textContent = overallText || '예보 정보가 없습니다.';
+    textEl.textContent = causeText || '예보 정보가 없습니다.';
 }
 
 // Format DateTime for Display
