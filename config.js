@@ -4,7 +4,7 @@ const CONFIG = {
     DEFAULT_API_KEY: '46f9303fd604ab12070a6a4e2adeb19a2a0f1fe0c6c3cb6ec54a6f91dfe722d3',
 
     // API Configuration
-    API_BASE_URL: 'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc',
+    API_BASE_URL: 'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc',
     API_ENDPOINT: '/getMinuDustFrcstDspth',
 
     // Request Parameters
@@ -52,3 +52,4 @@ const CONFIG = {
     // Region
     REGION: '서울'
 };
+
